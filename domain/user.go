@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"infrastructure"
+)
+
 type User struct {
 	UserID   int
 	Name     string
@@ -12,12 +16,7 @@ func (u *User) IsAdmin() bool {
    return u.Admin
 }
 
-func SelectUserByPrimaryKey(DB *sql.DB, userID string) (*User, error) {
-	//インフラストラクチャレイヤの実装を利⽤する。
-	dto, err := infrastructure.GetUserByID(DB, id)
-	if err != nil {
-		return nil, err
-	}
+func NewUserFromDTO(dto *UserDTO) *domain.User {
 	user := &User{
 		UserID:   dto.UserID,
 		Name:     dto.Name,
@@ -25,5 +24,5 @@ func SelectUserByPrimaryKey(DB *sql.DB, userID string) (*User, error) {
 		Password: dto.Password,
 		Admin:    dto.Admin,
 	}
-	return user, nil
+	return user
 }
