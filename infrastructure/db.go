@@ -18,12 +18,8 @@ type UserDTO struct {
 	Admin    string
 }
 
-func GetUserByID(DB *sql.DB, userID string) (*UserDTO, error) {
-//DB にアクセスするロジック
-	u := &UserDTO{}
-	row := DB.QueryRow("SELECT * FROM users WHERE user_id = ?", userID)
-	return u, nil
-}
+// Driver名
+const driverName = "mysql"
 
 // DB 各repositoryで利用するDB接続情報
 var DB *sql.DB
@@ -49,4 +45,23 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func SelectUserByPrimaryKey(DB *sql.DB, userID string) (*UserDTO, error) {
+	//DB にアクセスするロジック
+	row := DB.QueryRow("SELECT * FROM users WHERE user_id = ?", userID)
+	return convertToUserDTO
+}
+
+// convertToUser rowデータをUserデータへ変換する
+func convertToUserDTO(row *sql.Row) (*UserDTO, error) {
+	dto := UserDTO{}
+	err := row.Scan(&dto.UserID, &dto.Name, &dto.Email, &dto.Password, &dto.Admin)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println(err)
+		}
+		return nil, err
+	}
+	return &dto, nil
 }
