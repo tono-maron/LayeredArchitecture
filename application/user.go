@@ -1,11 +1,13 @@
 package application
 
 import (
-	"infrastructure"
-	"domain"
+	"LayeredArchitecture/domain"
+	"LayeredArchitecture/infrastructure"
 )
 
-
+type UserApplication struct {
+	User domain.User
+}
 
 func SelectUserByPrimaryKey(userID string) (*domain.User, error) {
 	//アプリケーションレイヤから
