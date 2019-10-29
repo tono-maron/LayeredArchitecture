@@ -75,7 +75,7 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	}
 
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
-	err = usecase.Insert(userID.String(), requestBody.Name, string(passwordDigest), email)
+	err = usecase.UserUsecase{}.Insert(config.DB, userID.String(), requestBody.Name, email, string(passwordDigest), false)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -97,7 +97,7 @@ func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httpr
 	password := requestBody.Password
 	email := requestBody.Email
 	//一致するアカウント情報を取得
-	user, err := usecase.SelectByEmail(email)
+	user, err := usecase.UserUsecase{}.SelectByEmail(config.DB, email)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
