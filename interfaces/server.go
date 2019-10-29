@@ -48,7 +48,7 @@ func Routes() *httprouter.Router {
 	router.POST("/user/signin", handler.HandleUserSignin)
 
 	// Post Route
-	router.GET("/post/get", middleware.Authenticate(handler.HandlePostGet))
+	router.GET("/post/:id", middleware.Authenticate(handler.HandlePostGet))
 	router.GET("/post/index", middleware.Authenticate(handler.HandlePostsGet))
 	router.POST("/post/create", middleware.Authenticate(handler.HandlePostCreate))
 	router.PUT("/post/update", middleware.Authenticate(handler.HandlePostUpdate))

@@ -1,5 +1,11 @@
 package repository
 
+import (
+	"database/sql"
+
+	"LayeredArchitecture/domain"
+)
+
 type PostRepository interface {
 	func SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
 	func GetAll(DB *sql.DB) ([]domain.Post, error)

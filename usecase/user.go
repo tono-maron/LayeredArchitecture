@@ -4,12 +4,11 @@ import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
 	"LayeredArchitecture/infrastructure/persistence"
-	"LayeredArchitecture/interfaces/response"
 	"database/sql"
 	"errors"
-	"net/http"
 	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,7 +34,7 @@ func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) 
 	}
 	//パスワードをハッシュ化する
 	var passwordDigest []byte
-	passwordDigest, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	passwordDigest, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) 
 	if err != nil {
 		return err
 	}
-	err := repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.string(), name, email, string(passwordDigest), false)
+	err = repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.string(), name, email, string(passwordDigest), false)
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,6 @@ func (userUsecase UserUsecase) CreateAuthToken(DB *sql.DB, email, password strin
 	}
 	return authToken, nil
 }
-
 
 //JWTで利用する署名
 var Signature = "lt9m2-vn8bzf-02p-sgaq-32r9hdvanva"

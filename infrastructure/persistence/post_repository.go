@@ -1,15 +1,23 @@
 package persistence
 
+import (
+	"LayeredArchitecture/domain"
+	"database/sql"
+)
 
 type PostPersistence struct{}
 
 func (postPersistence PostPersistence) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
-	row := DB.QueryRow("SELECT * FROM post WHERE post_id = ?", userID)
-	return convertToUser(row)
+	row := DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
+	return convertToPost(row)
 }
+
 func (postPersistence PostPersistence) GetAll(DB *sql.DB) ([]domain.Post, error) {
 	rows, err := DB.Query("SELECT * FROM post")
-	posts := make([]domain.Post)
+	if err != nil {
+		return nil, err
+	}
+	posts := make([]domain.Post, 0)
 	for rows.Next() {
 		var post domain.Post
 		err := rows.Scan(&post.PostID, &post.Content, &post.CreateUserID)
@@ -42,7 +50,7 @@ func (postPersistence PostPersistence) UpdateByPrimaryKey(DB *sql.DB, postID int
 	return err
 }
 
-func (postPersistence PostPersistence) Delete(DB *sql.DB, postID int) error {
+func (postPersistence PostPersistence) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
 	stmt, err := DB.Prepare("DELETE FROM post WHERE post_id=?")
 	if err != nil {
 		return err
@@ -58,7 +66,6 @@ func convertToPost(row *sql.Row) (*domain.Post, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Println(err)
 		return nil, err
 	}
 	return &post, nil
