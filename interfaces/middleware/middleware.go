@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"LayeredArchitecture/interfaces/dddcontext"
+	"LayeredArchitecture/interfaces/handler"
 	"LayeredArchitecture/interfaces/response"
 	"context"
 	"errors"
@@ -18,9 +19,6 @@ type JWT struct {
 	Iat   string `json:"iat"`
 	Exp   string `json:"exp"`
 }
-
-//改ざん検知のシグニチャ
-const Signature string = "767f4534-v840-b523220x4a24"
 
 func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -48,7 +46,7 @@ func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 				response.Error(writer, http.StatusBadRequest, err, "Bad Request")
 				return nil, err
 			}
-			return []byte(Signature), nil
+			return []byte(handler.Signature), nil
 		})
 		if err != nil {
 			writer.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
