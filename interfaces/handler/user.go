@@ -7,16 +7,10 @@ import (
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
-	"strings"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
-	"github.com/julienschmidt/httprouter"
-	"golang.org/x/crypto/bcrypt"
 )
+
 
 //ユーザ情報取得
 func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -34,7 +28,9 @@ func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprout
 	response.JSON(writer, http.StatusOK, user)
 }
 
-//新規登録
+
+
+// "/user/signup" 新規登録
 func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)
@@ -48,7 +44,7 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	json.Unmarshal(body, &requestBody)
 
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
-	err = usecase.UserUsecase{}.Insert(config.DB,　requestBody.Name, requestBody.Email, requestBody.Password, false)
+	err = usecase.UserUsecase{}.Insert(config.DB,　requestBody.Name, requestBody.Email, requestBody.Password)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -57,7 +53,9 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	response.JSON(writer, http.StatusOK, "")
 }
 
-//ログイン
+
+
+//"/user/signin" ログイン機能
 func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// リクエストBodyからログイン情報を取得
 	body, err := ioutil.ReadAll(request.Body)
@@ -65,43 +63,16 @@ func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httpr
 		response.Error(writer, http.StatusBadRequest, err, "Invalid Request Body")
 		return
 	}
+	//リクエストボディのパース
 	var requestBody userLoginRequest
 	json.Unmarshal(body, &requestBody)
-	password := requestBody.Password
-	email := requestBody.Email
-	//一致するアカウント情報を取得
-	user, err := usecase.UserUsecase{}.SelectByEmail(config.DB, email)
+
+	//Emailによってユーザ情報取得し、そこから認証トークンを作成し取得する。
+	authToken, err := usecase.UserUsecase{}.CreateAuthToken(config.DB, requestBody.Email, requestBody.Password)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
-		return
-	}
-	//認証トークンを生成する
-	//UUIDでユーザIDを取得
-	internalToken, err := uuid.NewRandom()
-	if err != nil {
-		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
-		return
-	}
-	// headerのセット
-	token := jwt.New(jwt.SigningMethodHS256)
-	//claimsのセット
-	claims := token.Claims.(jwt.MapClaims)
-	claims["admin"] = true
-	claims["sub"] = user.UserID
-	claims["it"] = internalToken
-	// 電子署名
-	tokenString, err := token.SignedString([]byte(middleware.Signature))
-	if err != nil {
-		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
-		return
-	}
-	strByte := []byte(tokenString)
-	authToken := string(strByte)
 
 	// レスポンスに必要な情報を詰めて返却
 	response.JSON(writer, http.StatusOK, tokenResponse{Token: authToken})
