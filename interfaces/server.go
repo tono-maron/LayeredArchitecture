@@ -42,6 +42,8 @@ func Routes() *httprouter.Router {
 
 	// User Route
 	router.GET("/user/get", middleware.Authenticate(handler.HandleUserGet))
+	router.POST("/user/signup", handler.HandleUserSignup)
+	router.POST("/user/signin", handler.HandleUserSignin)
 
 	return router
 }
