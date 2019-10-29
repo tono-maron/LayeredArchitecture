@@ -45,17 +45,53 @@ func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) 
 	if err != nil {
 		return err
 	}
-	err := repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.string(), name, email, string(passwordDigest), admin)
+	err := repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.string(), name, email, string(passwordDigest), false)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (userUsecase UserUsecase) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
+func (userUsecase UserUsecase) CreateAuthToken(DB *sql.DB, email, password string) (string, error) {
 	user, err := repository.UserRepository(persistence.UserPersistence{}).SelectByEmail(DB, email)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return user, nil
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", err
+	}
+	authToken, err := createJWT(user.UserID)
+	if err != nil {
+		return "", err
+	}
+	return authToken, nil
+}
+
+
+//JWTで利用する署名
+var Signature = "lt9m2-vn8bzf-02p-sgaq-32r9hdvanva"
+
+func createJWT(userID string) (string, error) {
+	//認証トークンを生成する
+	//UUIDでユーザIDを取得
+	internalToken, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	// headerのセット
+	token := jwt.New(jwt.SigningMethodHS256)
+	//claimsのセット
+	claims := token.Claims.(jwt.MapClaims)
+	claims["admin"] = true
+	claims["sub"] = userID
+	claims["it"] = internalToken
+	// 電子署名
+	tokenString, err := token.SignedString([]byte(Signature))
+	if err != nil {
+		return "", err
+	}
+	strByte := []byte(tokenString)
+	authToken := string(strByte)
+	return authToken, nil
 }

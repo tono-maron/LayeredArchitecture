@@ -3,6 +3,7 @@ package middleware
 import (
 	"LayeredArchitecture/interfaces/dddcontext"
 	"LayeredArchitecture/interfaces/response"
+	"LayeredArchitecture/usecase"
 	"context"
 	"errors"
 	"net/http"
@@ -18,8 +19,6 @@ type JWT struct {
 	Iat   string `json:"iat"`
 	Exp   string `json:"exp"`
 }
-
-var Signature = "lt9m2-vn8bzf-02p-sgaq-32r9hdvanva"
 
 func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -47,7 +46,7 @@ func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 				response.Error(writer, http.StatusBadRequest, err, "Bad Request")
 				return nil, err
 			}
-			return []byte(Signature), nil
+			return []byte(usecase.Signature), nil
 		})
 		if err != nil {
 			writer.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
