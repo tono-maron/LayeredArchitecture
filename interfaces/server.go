@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"LayeredArchitecture/interfaces/handler"
+	"LayeredArchitecture/interfaces/middleware"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,11 +24,26 @@ func Run(port int) error {
 func Routes() *httprouter.Router {
 	router := httprouter.New()
 
+	//Automatic OPTIONS response and CORS
+	router.GlobalOPTIONS = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("Access-Control-Request-Method") != "" {
+			// Set CORS headers
+			header := writer.Header()
+			header.Set("Access-Control-Allow-Methods", request.Header.Get("Allow"))
+			header.Set("Access-Control-Allow-Origin", "*")
+		}
+
+		// Adjust status code to 204
+		writer.WriteHeader(http.StatusNoContent)
+	})
+
 	// Index Route
 	router.GET("/", handler.Index)
 
 	// User Route
-	router.GET("/user/get", handler.HandleUserGet)
+	router.GET("/user/get", middleware.Authenticate(handler.HandleUserGet))
+	router.POST("/user/signup", handler.HandleUserSignup)
+	router.POST("/user/signin", handler.HandleUserSignin)
 
 	return router
 }
