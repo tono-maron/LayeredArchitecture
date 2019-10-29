@@ -3,6 +3,7 @@ package handler
 import (
 	"LayeredArchitecture/config"
 	"LayeredArchitecture/interfaces/dddcontext"
+	"LayeredArchitecture/interfaces/middleware"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
@@ -16,8 +17,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var Signature = "lt9m2-vn8bzf-02p-sgaq-32r9hdvanva"
 
 //ユーザ情報取得
 func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -122,7 +121,7 @@ func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httpr
 	claims["sub"] = user.UserID
 	claims["it"] = internalToken
 	// 電子署名
-	tokenString, err := token.SignedString([]byte(Signature))
+	tokenString, err := token.SignedString([]byte(middleware.Signature))
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
