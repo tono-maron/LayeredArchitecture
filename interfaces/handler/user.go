@@ -3,20 +3,19 @@ package handler
 import (
 	"LayeredArchitecture/config"
 	"LayeredArchitecture/interfaces/dddcontext"
-	"LayeredArchitecture/interfaces/middleware"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-)
 
+	"github.com/julienschmidt/httprouter"
+)
 
 //ユーザ情報取得
 func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
 	ctx := request.Context()
-	//userIDが空かどうかのチェックはミドルウェアで実装してあるためここでのエラーハンドリングはない。
 	userID := dddcontext.GetUserIDFromContext(ctx)
 
 	//applicationレイヤを操作して、ユーザデータ取得
@@ -27,8 +26,6 @@ func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprout
 	}
 	response.JSON(writer, http.StatusOK, user)
 }
-
-
 
 // "/user/signup" 新規登録
 func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -44,7 +41,7 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	json.Unmarshal(body, &requestBody)
 
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
-	err = usecase.UserUsecase{}.Insert(config.DB,　requestBody.Name, requestBody.Email, requestBody.Password)
+	err = usecase.UserUsecase{}.Insert(config.DB, requestBody.Name, requestBody.Email, requestBody.Password)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -52,8 +49,6 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	// レスポンスに必要な情報を詰めて返却
 	response.JSON(writer, http.StatusOK, "")
 }
-
-
 
 //"/user/signin" ログイン機能
 func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
