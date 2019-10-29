@@ -29,7 +29,9 @@ func Routes() *httprouter.Router {
 		if request.Header.Get("Access-Control-Request-Method") != "" {
 			// Set CORS headers
 			header := writer.Header()
+			//プリフライトリクエストのレスポンスの中で、リソースにアクセスするときに利用できる1つまたは複数のメソッドを指定します。
 			header.Set("Access-Control-Allow-Methods", request.Header.Get("Allow"))
+			//指定されたオリジンからのリクエストを行うコードでレスポンスが共有できるかどうかを示します。
 			header.Set("Access-Control-Allow-Origin", "*")
 		}
 
@@ -38,7 +40,7 @@ func Routes() *httprouter.Router {
 	})
 
 	// Index Route
-	router.GET("/", handler.Index)
+	//router.GET("/", handler.Index)
 
 	// User Route
 	router.GET("/user/get", middleware.Authenticate(handler.HandleUserGet))

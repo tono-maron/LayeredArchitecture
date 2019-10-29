@@ -36,7 +36,7 @@ func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprout
 
 //新規登録
 func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
-	//リクエストBodyから更新後情報を取得
+	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		response.Error(writer, http.StatusBadRequest, err, "Invalid Request Body")
@@ -46,35 +46,9 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	//リクエストボディのパース
 	var requestBody userSignupRequest
 	json.Unmarshal(body, &requestBody)
-	password := requestBody.Password
-	email := requestBody.Email
-	//passwordとemailのバリデーション
-	if len(password) < 8 {
-		response.Error(writer, http.StatusBadRequest, errors.New("validation error for password"), "Bad Request")
-		return
-	}
-	//TODO: しっかりバリデーションをする
-	if !(strings.Contains(email, "@")) {
-		response.Error(writer, http.StatusBadRequest, errors.New("validation error for email"), "Bad Request")
-		return
-	}
-	//パスワードをハッシュ化する
-	var passwordDigest []byte
-	passwordDigest, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
-		return
-	}
-
-	//UUIDでユーザIDを取得
-	userID, err := uuid.NewRandom()
-	if err != nil {
-		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
-		return
-	}
 
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
-	err = usecase.UserUsecase{}.Insert(config.DB, userID.String(), requestBody.Name, email, string(passwordDigest), false)
+	err = usecase.UserUsecase{}.Insert(config.DB,　requestBody.Name, requestBody.Email, requestBody.Password, false)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
