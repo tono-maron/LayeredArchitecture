@@ -9,8 +9,8 @@ import (
 
 type PostUsecase struct{}
 
-func (postUsecase PostUsecase) SelectByPrimaryKey(DB *sql.DB, postID int, userID string) (*domain.Post, error) {
-	post, err := repository.PostRepository(persistence.PostPersistence{}).SelectByPrimaryKey(DB, postID, userID)
+func (postUsecase PostUsecase) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
+	post, err := repository.PostRepository(persistence.PostPersistence{}).SelectByPrimaryKey(DB, postID)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func (postUsecase PostUsecase) GetAll(DB *sql.DB) ([]domain.Post, error) {
 	return posts, nil
 }
 
-func (postUsecase PostUsecase) Insert(DB *sql.DB, content string) error {
-	err := repository.PostRepository(persistence.PostPersistence{}).Insert(DB, content)
+func (postUsecase PostUsecase) Insert(DB *sql.DB, content, userID string) error {
+	err := repository.PostRepository(persistence.PostPersistence{}).Insert(DB, content, userID)
 	if err != nil {
 		return err
 	}

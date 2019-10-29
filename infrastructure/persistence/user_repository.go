@@ -3,7 +3,6 @@ package persistence
 import (
 	"LayeredArchitecture/domain"
 	"database/sql"
-	"log"
 )
 
 type UserPersistence struct{}
@@ -34,7 +33,6 @@ func convertToUser(row *sql.Row) (*domain.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Println(err)
 		return nil, err
 	}
 	return &user, nil

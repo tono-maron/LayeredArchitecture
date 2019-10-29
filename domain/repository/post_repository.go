@@ -7,9 +7,9 @@ import (
 )
 
 type PostRepository interface {
-	func SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
-	func GetAll(DB *sql.DB) ([]domain.Post, error)
-	func Insert(DB *sql.DB, postID int, content, userID string) error
-	func UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
-	func Delete(DB *sql.DB, postID int) error
+	SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
+	GetAll(DB *sql.DB) ([]domain.Post, error)
+	Insert(DB *sql.DB, content, userID string) error
+	UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
+	DeleteByPrimaryKey(DB *sql.DB, postID int) error
 }
