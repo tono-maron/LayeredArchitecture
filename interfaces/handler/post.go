@@ -4,6 +4,8 @@ import (
 	"LayeredArchitecture/config"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -36,7 +38,22 @@ func HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprou
 }
 
 func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	//リクエストボディからサインアップ情報を取得
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		response.Error(writer, http.StatusBadRequest, err, "Invalid Request Body")
+		return
+	}
 
+	//リクエストボディのパース
+	var requestBody postCreateRequest
+	json.Unmarshal(body, &requestBody)
+	err := usecase.PostUsecase{}.Insert(config.DB, requestBody.Content)
+	if err != nil {
+		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
+		return
+	}
+	response.JSON(writer, http.StatusOK, "")
 }
 
 func HandlePostUpdate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -45,4 +62,8 @@ func HandlePostUpdate(writer http.ResponseWriter, request *http.Request, _ httpr
 
 func HandlePostDelete(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
+}
+
+type postCreateRequest struct {
+	Content string `json:"content"`
 }

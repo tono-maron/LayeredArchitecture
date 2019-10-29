@@ -33,6 +33,6 @@ func (postUsecase PostUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int) ([]dom
 
 }
 
-func (postUsecase PostUsecase) DeleteByPrimaryKey(DB *sql.DB) ([]domain.Post, error) {
+func (postUsecase PostUsecase) DeleteByPrimaryKey(DB *sql.DB, postID int) ([]domain.Post, error) {
 
 }
