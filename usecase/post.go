@@ -34,9 +34,17 @@ func (postUsecase PostUsecase) Insert(DB *sql.DB, content string) error {
 }
 
 func (postUsecase PostUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
-
+	err := repository.PostRepository(persistence.PostPersistence{}).UpdateByPrimaryKey(DB, postID, content)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (postUsecase PostUsecase) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
-
+	err := repository.PostRepository(persistence.PostPersistence{}).DeleteByPrimaryKey(DB, postID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
