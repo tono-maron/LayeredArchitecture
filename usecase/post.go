@@ -9,8 +9,8 @@ import (
 
 type PostUsecase struct{}
 
-func (postUsecase PostUsecase) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
-	post, err := repository.PostRepository(persistence.PostPersistence{}).SelectByPrimaryKey(DB, postID)
+func (postUsecase PostUsecase) SelectByPrimaryKey(DB *sql.DB, postID int, userID string) (*domain.Post, error) {
+	post, err := repository.PostRepository(persistence.PostPersistence{}).SelectByPrimaryKey(DB, postID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (postUsecase PostUsecase) Insert(DB *sql.DB, content string) error {
 	return nil
 }
 
-func (postUsecase PostUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int) error {
+func (postUsecase PostUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
 
 }
 

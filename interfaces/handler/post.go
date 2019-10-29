@@ -2,6 +2,7 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
+	"LayeredArchitecture/interfaces/dddcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
@@ -38,6 +39,10 @@ func HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprou
 }
 
 func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	// Contextから認証済みのユーザIDを取得
+	ctx := request.Context()
+	userID := dddcontext.GetUserIDFromContext(ctx)
+
 	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -46,9 +51,9 @@ func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httpr
 	}
 
 	//リクエストボディのパース
-	var requestBody postCreateRequest
+	var requestBody postRequest
 	json.Unmarshal(body, &requestBody)
-	err := usecase.PostUsecase{}.Insert(config.DB, requestBody.Content)
+	err = usecase.PostUsecase{}.Insert(config.DB, requestBody.Content, userID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -56,14 +61,47 @@ func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httpr
 	response.JSON(writer, http.StatusOK, "")
 }
 
-func HandlePostUpdate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func HandlePostUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	// パラメータからpostIDを取得
+	postID, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
+	}
+	//リクエストボディからサインアップ情報を取得
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		response.Error(writer, http.StatusBadRequest, err, "Invalid Request Body")
+		return
+	}
 
+	//リクエストボディのパース
+	var requestBody postRequest
+	json.Unmarshal(body, &requestBody)
+
+	//applicationレイヤを操作して、ユーザデータ更新
+	err = usecase.PostUsecase{}.UpdateByPrimaryKey(config.DB, postID, requestBody.Content)
+	if err != nil {
+		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
+		return
+	}
+	response.JSON(writer, http.StatusOK, "")
 }
 
-func HandlePostDelete(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
-
+func HandlePostDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	// パラメータからpostIDを取得
+	postID, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
+	}
+	//applicationレイヤを操作して、ユーザデータ削除
+	err = usecase.PostUsecase{}.DeleteByPrimaryKey(config.DB, postID)
+	if err != nil {
+		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
+		return
+	}
+	response.JSON(writer, http.StatusOK, "")
 }
 
-type postCreateRequest struct {
+type postRequest struct {
 	Content string `json:"content"`
 }
