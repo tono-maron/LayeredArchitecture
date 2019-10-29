@@ -1,11 +1,10 @@
 package config
 
 import (
-	"os"
 	"database/sql"
 	"fmt"
 	"log"
-
+	"os"
 )
 
 // Driver名
