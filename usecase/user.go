@@ -3,7 +3,6 @@ package usecase
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -15,7 +14,9 @@ import (
 
 // UserUseCase : User における UseCase のインターフェース
 type UserUseCase interface {
-	GetAll(context.Context) ([]*domain.User, error)
+	SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error)
+	Insert(DB *sql.DB, userID, name, email, password string, admin bool) error
+	SelectByEmail(DB *sql.DB, email string) (*domain.User, error)
 }
 
 type userUseCase struct {
@@ -24,7 +25,7 @@ type userUseCase struct {
 
 // NewUserUseCase : User データに関する UseCase を生成
 func NewUserUseCase(ur repository.UserRepository) UserUseCase {
-	return &userUseCase{
+	return &userUsecase{
 		userRepository: ur,
 	}
 }

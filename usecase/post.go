@@ -3,46 +3,62 @@ package usecase
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"LayeredArchitecture/infrastructure/persistence"
 	"database/sql"
 )
 
-type PostUsecase struct{}
+type PostUsecase interface {
+	SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
+	GetAll(DB *sql.DB) ([]domain.Post, error)
+	Insert(DB *sql.DB, content, userID string) error
+	UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
+	DeleteByPrimaryKey(DB *sql.DB, postID int) error
+}
 
-func (postUsecase PostUsecase) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
-	post, err := repository.PostRepository(persistence.PostPersistence{}).SelectByPrimaryKey(DB, postID)
+type postUsecase struct {
+	postRepository repository.PostRepository
+}
+
+// NewUserUseCase : User データに関する UseCase を生成
+func NewPostUseCase(pr repository.PostRepository) PostUseCase {
+	return &postUseCase{
+		postRepository: pr,
+	}
+}
+
+func (pu postUsecase) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
+	post, err := pu.postRepository.SelectByPrimaryKey(DB, postID)
 	if err != nil {
 		return nil, err
 	}
 	return post, nil
 }
 
-func (postUsecase PostUsecase) GetAll(DB *sql.DB) ([]domain.Post, error) {
-	posts, err := repository.PostRepository(persistence.PostPersistence{}).GetAll(DB)
+func (pu postUsecase) GetAll(DB *sql.DB) ([]domain.Post, error) {
+	posts, err := pu.postRepository.GetAll(DB)
 	if err != nil {
 		return nil, err
 	}
 	return posts, nil
 }
 
-func (postUsecase PostUsecase) Insert(DB *sql.DB, content, userID string) error {
-	err := repository.PostRepository(persistence.PostPersistence{}).Insert(DB, content, userID)
+func (pu postUsecase) Insert(DB *sql.DB, content, userID string) error {
+	err := pu.postRepository.Insert(DB, content, userID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (postUsecase PostUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
-	err := repository.PostRepository(persistence.PostPersistence{}).UpdateByPrimaryKey(DB, postID, content)
+func (pu postUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
+	err := pu.postRepository.UpdateByPrimaryKey(DB, postID, content)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (postUsecase PostUsecase) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
-	err := repository.PostRepository(persistence.PostPersistence{}).DeleteByPrimaryKey(DB, postID)
+func (pu postUsecase) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
+	err := pu.postRepository.DeleteByPrimaryKey(DB, postID)
 	if err != nil {
 		return err
 	}
