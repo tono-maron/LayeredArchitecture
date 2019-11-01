@@ -2,10 +2,15 @@ package persistence
 
 import (
 	"LayeredArchitecture/domain"
+	"LayeredArchitecture/domain/repository"
 	"database/sql"
 )
 
 type UserPersistence struct{}
+
+func NewUserPersistence() repository.UserRepository {
+	return &UserPersistence{}
+}
 
 func (userPersistence UserPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
 	row := DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)

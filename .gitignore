@@ -2,3 +2,4 @@ go.mod
 go.sum
 *.iml
 .idea
+/db/setup.txt

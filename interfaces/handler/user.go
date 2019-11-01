@@ -7,6 +7,7 @@ import (
 	"LayeredArchitecture/usecase"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -43,6 +44,7 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
 	err = usecase.UserUsecase{}.Insert(config.DB, requestBody.Name, requestBody.Email, requestBody.Password)
 	if err != nil {
+		log.Println(err)
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
 	}

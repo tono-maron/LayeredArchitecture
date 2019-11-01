@@ -44,6 +44,7 @@ func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) 
 	if err != nil {
 		return err
 	}
+
 	err = repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.String(), name, email, string(passwordDigest), false)
 	if err != nil {
 		return err

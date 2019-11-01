@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	// blank import for MySQL driver
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Driver名
