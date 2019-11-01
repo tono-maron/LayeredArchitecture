@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"LayeredArchitecture/interfaces/dddcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"context"
@@ -25,9 +24,6 @@ func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 		// Get the Basic Authentication credentials
 		//JWTを用いた認証
 		ctx := request.Context()
-		if ctx == nil {
-			ctx = context.Background()
-		}
 
 		// リクエストヘッダからx-token(認証トークン)を取得
 		authToken := request.Header.Get("x-token")
@@ -76,7 +72,7 @@ func Authenticate(nextFunc httprouter.Handle) httprouter.Handle {
 		}
 
 		// userIdをContextへ保存して以降の処理に利用する
-		ctx = dddcontext.SetUserID(ctx, userID)
+		ctx = context.WithValue(ctx, "userID", userID)
 
 		//次の処理へ
 		nextFunc(writer, request, params)
