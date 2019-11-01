@@ -2,7 +2,7 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
-	"LayeredArchitecture/interfaces/dddcontext"
+	"LayeredArchitecture/interfaces/dcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
@@ -59,8 +59,7 @@ func (ph postHandler) HandlePostsGet(writer http.ResponseWriter, request *http.R
 
 func (ph postHandler) HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
-	ctx := request.Context()
-	userID := dddcontext.GetUserIDFromContext(ctx)
+	userID := dcontext.GetUserIDFromContext(dcontext.Ctx)
 
 	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)

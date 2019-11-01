@@ -38,7 +38,7 @@ func (pp postPersistence) GetAll(DB *sql.DB) ([]domain.Post, error) {
 }
 
 func (pp postPersistence) Insert(DB *sql.DB, content, userID string) error {
-	stmt, err := DB.Prepare("INSERT INTO post(content, create_user_id) VALUES(?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
 	}

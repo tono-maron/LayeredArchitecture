@@ -2,6 +2,7 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
+	"LayeredArchitecture/interfaces/dcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
 	"encoding/json"
@@ -32,11 +33,12 @@ func NewUserHandler(uu usecase.UserUsecase) UserHandler {
 //ユーザ情報取得
 func (uh userHandler) HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
-	ctx := request.Context()
-	userID := ctx.Value("userID")
+	// ctx := request.Context()
+	userID := dcontext.GetUserIDFromContext(dcontext.Ctx)
+	//log.Println(userID)
 
 	//applicationレイヤを操作して、ユーザデータ取得
-	user, err := uh.userUsecase.SelectByPrimaryKey(config.DB, userID.(string))
+	user, err := uh.userUsecase.SelectByPrimaryKey(config.DB, userID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
