@@ -6,18 +6,18 @@ import (
 	"database/sql"
 )
 
-type UserPersistence struct{}
+type userPersistence struct{}
 
 func NewUserPersistence() repository.UserRepository {
-	return &UserPersistence{}
+	return &userPersistence{}
 }
 
-func (userPersistence UserPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
+func (up UserPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
 	row := DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)
 	return convertToUser(row)
 }
 
-func (userPersistence UserPersistence) Insert(DB *sql.DB, userID, name, email, password string, admin bool) error {
+func (up UserPersistence) Insert(DB *sql.DB, userID, name, email, password string, admin bool) error {
 	stmt, err := DB.Prepare("INSERT INTO user(user_id, name, email, password, admin) VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (userPersistence UserPersistence) Insert(DB *sql.DB, userID, name, email, p
 	return err
 }
 
-func (userPersistence UserPersistence) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
+func (up UserPersistence) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
 	row := DB.QueryRow("SELECT * FROM user WHERE email = ?", email)
 	return convertToUser(row)
 }
