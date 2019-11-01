@@ -3,7 +3,7 @@ package usecase
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"LayeredArchitecture/infrastructure/persistence"
+	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -13,17 +13,31 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserUsecase struct{}
+// UserUseCase : User における UseCase のインターフェース
+type UserUseCase interface {
+	GetAll(context.Context) ([]*domain.User, error)
+}
 
-func (userUsecase UserUsecase) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
-	user, err := repository.UserRepository(persistence.UserPersistence{}).SelectByPrimaryKey(DB, userID)
+type userUseCase struct {
+	userRepository repository.UserRepository
+}
+
+// NewUserUseCase : User データに関する UseCase を生成
+func NewUserUseCase(ur repository.UserRepository) UserUseCase {
+	return &userUseCase{
+		userRepository: ur,
+	}
+}
+
+func (uu userUsecase) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
+	user, err := uu.userRepository.SelectByPrimaryKey(DB, userID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) error {
+func (uu userUsecase) Insert(DB *sql.DB, name, email, password string) error {
 	//passwordとemailのバリデーション
 	if len(password) < 8 {
 		return errors.New("validation error for password")
@@ -45,15 +59,15 @@ func (userUsecase UserUsecase) Insert(DB *sql.DB, name, email, password string) 
 		return err
 	}
 
-	err = repository.UserRepository(persistence.UserPersistence{}).Insert(DB, userID.String(), name, email, string(passwordDigest), false)
+	err = uu.userRepository.Insert(DB, userID.String(), name, email, string(passwordDigest), false)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (userUsecase UserUsecase) CreateAuthToken(DB *sql.DB, email, password string) (string, error) {
-	user, err := repository.UserRepository(persistence.UserPersistence{}).SelectByEmail(DB, email)
+func (uu userUsecase) CreateAuthToken(DB *sql.DB, email, password string) (string, error) {
+	user, err := uu.userRepository.SelectByEmail(DB, email)
 	if err != nil {
 		return "", err
 	}
