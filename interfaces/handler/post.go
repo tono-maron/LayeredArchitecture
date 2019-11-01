@@ -2,9 +2,11 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
+	"LayeredArchitecture/domain"
 	"LayeredArchitecture/interfaces/dddcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
+	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +15,26 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func HandlePostGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+type PostHandler interface {
+	SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
+	GetAll(DB *sql.DB) ([]domain.Post, error)
+	Insert(DB *sql.DB, content, userID string) error
+	UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
+	DeleteByPrimaryKey(DB *sql.DB, postID int) error
+}
+
+type postHandler struct {
+	postUsecase usecase.PostUsecase
+}
+
+// NewUserUsecase : User データに関する Handler を生成
+func NewPostHandler(pu usecase.PostUsecase) PostHandler {
+	return &postHandler{
+		postUsecase: pu,
+	}
+}
+
+func (ph postHandler) HandlePostGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// パラメータからpostIDを取得
 	postID, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
@@ -28,7 +49,7 @@ func HandlePostGet(writer http.ResponseWriter, request *http.Request, params htt
 	response.JSON(writer, http.StatusOK, post)
 }
 
-func HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func (ph postHandler) HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	//applicationレイヤを操作して、ユーザデータ取得
 	posts, err := usecase.PostUsecase{}.GetAll(config.DB)
 	if err != nil {
@@ -38,7 +59,7 @@ func HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprou
 	response.JSON(writer, http.StatusOK, posts)
 }
 
-func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func (ph postHandler) HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
 	ctx := request.Context()
 	userID := dddcontext.GetUserIDFromContext(ctx)
@@ -61,7 +82,7 @@ func HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httpr
 	response.JSON(writer, http.StatusOK, "")
 }
 
-func HandlePostUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (ph postHandler) HandlePostUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// パラメータからpostIDを取得
 	postID, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {

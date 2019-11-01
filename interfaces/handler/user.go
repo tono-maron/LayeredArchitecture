@@ -2,9 +2,11 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
+	"LayeredArchitecture/domain"
 	"LayeredArchitecture/interfaces/dddcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
+	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -13,8 +15,25 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type UserHandler interface {
+	SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error)
+	Insert(DB *sql.DB, userID, name, email, password string, admin bool) error
+	SelectByEmail(DB *sql.DB, email string) (*domain.User, error)
+}
+
+type userHandler struct {
+	userUsecase usecase.UserUsecase
+}
+
+// NewUserUsecase : User データに関する Handler を生成
+func NewBookHandler(uu usecase.UserUsecase) UserHandler {
+	return &userHandler{
+		userUsecase: uu,
+	}
+}
+
 //ユーザ情報取得
-func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func (uh userHandler) HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
 	ctx := request.Context()
 	userID := dddcontext.GetUserIDFromContext(ctx)
@@ -29,7 +48,7 @@ func HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprout
 }
 
 // "/user/signup" 新規登録
-func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func (uh userHandler) HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -53,7 +72,7 @@ func HandleUserSignup(writer http.ResponseWriter, request *http.Request, _ httpr
 }
 
 //"/user/signin" ログイン機能
-func HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func (uh userHandler) HandleUserSignin(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// リクエストBodyからログイン情報を取得
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
