@@ -12,12 +12,12 @@ func NewUserPersistence() repository.UserRepository {
 	return &userPersistence{}
 }
 
-func (up UserPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
+func (up userPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
 	row := DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)
 	return convertToUser(row)
 }
 
-func (up UserPersistence) Insert(DB *sql.DB, userID, name, email, password string, admin bool) error {
+func (up userPersistence) Insert(DB *sql.DB, userID, name, email, password string, admin bool) error {
 	stmt, err := DB.Prepare("INSERT INTO user(user_id, name, email, password, admin) VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (up UserPersistence) Insert(DB *sql.DB, userID, name, email, password strin
 	return err
 }
 
-func (up UserPersistence) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
+func (up userPersistence) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
 	row := DB.QueryRow("SELECT * FROM user WHERE email = ?", email)
 	return convertToUser(row)
 }

@@ -19,8 +19,8 @@ type postUsecase struct {
 }
 
 // NewUserUseCase : User データに関する UseCase を生成
-func NewPostUseCase(pr repository.PostRepository) PostUseCase {
-	return &postUseCase{
+func NewPostUseCase(pr repository.PostRepository) PostUsecase {
+	return &postUsecase{
 		postRepository: pr,
 	}
 }

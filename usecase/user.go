@@ -13,18 +13,18 @@ import (
 )
 
 // UserUseCase : User における UseCase のインターフェース
-type UserUseCase interface {
+type UserUsecase interface {
 	SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error)
 	Insert(DB *sql.DB, userID, name, email, password string, admin bool) error
 	SelectByEmail(DB *sql.DB, email string) (*domain.User, error)
 }
 
-type userUseCase struct {
+type userUsecase struct {
 	userRepository repository.UserRepository
 }
 
 // NewUserUseCase : User データに関する UseCase を生成
-func NewUserUseCase(ur repository.UserRepository) UserUseCase {
+func NewUserUsecase(ur repository.UserRepository) UserUsecase {
 	return &userUsecase{
 		userRepository: ur,
 	}
