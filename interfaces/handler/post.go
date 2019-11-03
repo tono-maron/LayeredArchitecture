@@ -2,11 +2,9 @@ package handler
 
 import (
 	"LayeredArchitecture/config"
-	"LayeredArchitecture/domain"
-	"LayeredArchitecture/interfaces/dddcontext"
+	"LayeredArchitecture/interfaces/dcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
-	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -16,11 +14,11 @@ import (
 )
 
 type PostHandler interface {
-	SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
-	GetAll(DB *sql.DB) ([]domain.Post, error)
-	Insert(DB *sql.DB, content, userID string) error
-	UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
-	DeleteByPrimaryKey(DB *sql.DB, postID int) error
+	HandlePostGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandlePostCreate(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandlePostsGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandlePostUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandlePostDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type postHandler struct {
@@ -41,7 +39,7 @@ func (ph postHandler) HandlePostGet(writer http.ResponseWriter, request *http.Re
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 	}
 	//applicationレイヤを操作して、ユーザデータ取得
-	post, err := usecase.PostUsecase{}.SelectByPrimaryKey(config.DB, postID)
+	post, err := ph.postUsecase.SelectByPrimaryKey(postID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -51,7 +49,7 @@ func (ph postHandler) HandlePostGet(writer http.ResponseWriter, request *http.Re
 
 func (ph postHandler) HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	//applicationレイヤを操作して、ユーザデータ取得
-	posts, err := usecase.PostUsecase{}.GetAll(config.DB)
+	posts, err := ph.postUsecase.GetAll(config.DB)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -61,8 +59,7 @@ func (ph postHandler) HandlePostsGet(writer http.ResponseWriter, request *http.R
 
 func (ph postHandler) HandlePostCreate(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
-	ctx := request.Context()
-	userID := dddcontext.GetUserIDFromContext(ctx)
+	userID := dcontext.GetUserIDFromContext(dcontext.Ctx)
 
 	//リクエストボディからサインアップ情報を取得
 	body, err := ioutil.ReadAll(request.Body)
@@ -74,7 +71,7 @@ func (ph postHandler) HandlePostCreate(writer http.ResponseWriter, request *http
 	//リクエストボディのパース
 	var requestBody postRequest
 	json.Unmarshal(body, &requestBody)
-	err = usecase.PostUsecase{}.Insert(config.DB, requestBody.Content, userID)
+	err = ph.postUsecase.Insert(requestBody.Content, userID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -100,7 +97,7 @@ func (ph postHandler) HandlePostUpdate(writer http.ResponseWriter, request *http
 	json.Unmarshal(body, &requestBody)
 
 	//applicationレイヤを操作して、ユーザデータ更新
-	err = usecase.PostUsecase{}.UpdateByPrimaryKey(config.DB, postID, requestBody.Content)
+	err = ph.postUsecase.UpdateByPrimaryKey(postID, requestBody.Content)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -108,14 +105,14 @@ func (ph postHandler) HandlePostUpdate(writer http.ResponseWriter, request *http
 	response.JSON(writer, http.StatusOK, "")
 }
 
-func HandlePostDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (ph postHandler) HandlePostDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// パラメータからpostIDを取得
 	postID, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 	}
 	//applicationレイヤを操作して、ユーザデータ削除
-	err = usecase.PostUsecase{}.DeleteByPrimaryKey(config.DB, postID)
+	err = ph.postUsecase.DeleteByPrimaryKey(postID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return

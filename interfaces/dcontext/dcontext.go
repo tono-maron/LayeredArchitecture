@@ -1,4 +1,4 @@
-package dddcontext
+package dcontext
 
 import (
 	"context"
@@ -9,6 +9,8 @@ type key string
 const (
 	userIDKey key = "userID"
 )
+
+var Ctx context.Context = context.Background()
 
 // SetUserID ContextへUserIDを保存する
 func SetUserID(ctx context.Context, userID string) context.Context {

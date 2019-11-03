@@ -3,7 +3,6 @@ package usecase
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"database/sql"
 	"errors"
 	"strings"
 
@@ -14,9 +13,9 @@ import (
 
 // UserUseCase : User における UseCase のインターフェース
 type UserUsecase interface {
-	SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error)
-	Insert(DB *sql.DB, userID, name, email, password string, admin bool) error
-	SelectByEmail(DB *sql.DB, email string) (*domain.User, error)
+	SelectByPrimaryKey(userID string) (*domain.User, error)
+	Insert(name, email, password string) error
+	CreateAuthToken(email, password string) (string, error)
 }
 
 type userUsecase struct {
@@ -30,15 +29,15 @@ func NewUserUsecase(ur repository.UserRepository) UserUsecase {
 	}
 }
 
-func (uu userUsecase) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
-	user, err := uu.userRepository.SelectByPrimaryKey(DB, userID)
+func (uu userUsecase) SelectByPrimaryKey(userID string) (*domain.User, error) {
+	user, err := uu.userRepository.SelectByPrimaryKey(userID)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (uu userUsecase) Insert(DB *sql.DB, name, email, password string) error {
+func (uu userUsecase) Insert(name, email, password string) error {
 	//passwordとemailのバリデーション
 	if len(password) < 8 {
 		return errors.New("validation error for password")
@@ -60,15 +59,15 @@ func (uu userUsecase) Insert(DB *sql.DB, name, email, password string) error {
 		return err
 	}
 
-	err = uu.userRepository.Insert(DB, userID.String(), name, email, string(passwordDigest), false)
+	err = uu.userRepository.Insert(userID.String(), name, email, string(passwordDigest), false)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (uu userUsecase) CreateAuthToken(DB *sql.DB, email, password string) (string, error) {
-	user, err := uu.userRepository.SelectByEmail(DB, email)
+func (uu userUsecase) CreateAuthToken(email, password string) (string, error) {
+	user, err := uu.userRepository.SelectByEmail(email)
 	if err != nil {
 		return "", err
 	}

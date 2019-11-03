@@ -1,12 +1,9 @@
 package handler
 
 import (
-	"LayeredArchitecture/config"
-	"LayeredArchitecture/domain"
-	"LayeredArchitecture/interfaces/dddcontext"
+	"LayeredArchitecture/interfaces/dcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
-	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -16,9 +13,9 @@ import (
 )
 
 type UserHandler interface {
-	SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error)
-	Insert(DB *sql.DB, userID, name, email, password string, admin bool) error
-	SelectByEmail(DB *sql.DB, email string) (*domain.User, error)
+	HandleUserGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandleUserSignin(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	HandleUserSignup(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type userHandler struct {
@@ -26,7 +23,7 @@ type userHandler struct {
 }
 
 // NewUserUsecase : User データに関する Handler を生成
-func NewBookHandler(uu usecase.UserUsecase) UserHandler {
+func NewUserHandler(uu usecase.UserUsecase) UserHandler {
 	return &userHandler{
 		userUsecase: uu,
 	}
@@ -35,11 +32,12 @@ func NewBookHandler(uu usecase.UserUsecase) UserHandler {
 //ユーザ情報取得
 func (uh userHandler) HandleUserGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	// Contextから認証済みのユーザIDを取得
-	ctx := request.Context()
-	userID := dddcontext.GetUserIDFromContext(ctx)
+	// ctx := request.Context()
+	userID := dcontext.GetUserIDFromContext(dcontext.Ctx)
+	//log.Println(userID)
 
 	//applicationレイヤを操作して、ユーザデータ取得
-	user, err := usecase.UserUsecase{}.SelectByPrimaryKey(config.DB, userID)
+	user, err := uh.userUsecase.SelectByPrimaryKey(userID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -61,7 +59,7 @@ func (uh userHandler) HandleUserSignup(writer http.ResponseWriter, request *http
 	json.Unmarshal(body, &requestBody)
 
 	//userIDによってuserテーブルにハッシュ化されたパスワードとemaiと更新されたauth_tokenを更新する
-	err = usecase.UserUsecase{}.Insert(config.DB, requestBody.Name, requestBody.Email, requestBody.Password)
+	err = uh.userUsecase.Insert(requestBody.Name, requestBody.Email, requestBody.Password)
 	if err != nil {
 		log.Println(err)
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
@@ -84,7 +82,7 @@ func (uh userHandler) HandleUserSignin(writer http.ResponseWriter, request *http
 	json.Unmarshal(body, &requestBody)
 
 	//Emailによってユーザ情報取得し、そこから認証トークンを作成し取得する。
-	authToken, err := usecase.UserUsecase{}.CreateAuthToken(config.DB, requestBody.Email, requestBody.Password)
+	authToken, err := uh.userUsecase.CreateAuthToken(requestBody.Email, requestBody.Password)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return

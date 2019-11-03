@@ -1,4 +1,4 @@
-package config
+package infrastructure
 
 import (
 	"database/sql"
@@ -13,10 +13,10 @@ import (
 // Driver名
 const driverName = "mysql"
 
-// DB 各repositoryで利用するDB接続情報
+//DB接続情報
 var DB *sql.DB
 
-func init() {
+func NewDBConnection() {
 	/* ===== データベースへ接続する. ===== */
 	// ユーザ
 	user := os.Getenv("MYSQL_USER")
@@ -31,8 +31,7 @@ func init() {
 
 	// 接続情報は以下のように指定する.
 	// user:password@tcp(host:port)/database
-	var err error
-	DB, err = sql.Open(driverName,
+	DB, err := sql.Open(driverName,
 		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database))
 	if err != nil {
 		log.Fatal(err)

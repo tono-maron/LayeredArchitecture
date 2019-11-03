@@ -3,6 +3,7 @@ package persistence
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
+	"LayeredArchitecture/infrastructure"
 	"database/sql"
 )
 
@@ -12,13 +13,13 @@ func NewUserPersistence() repository.UserRepository {
 	return &userPersistence{}
 }
 
-func (up userPersistence) SelectByPrimaryKey(DB *sql.DB, userID string) (*domain.User, error) {
-	row := DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)
+func (up userPersistence) SelectByPrimaryKey(userID string) (*domain.User, error) {
+	row := infrastructure.DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)
 	return convertToUser(row)
 }
 
-func (up userPersistence) Insert(DB *sql.DB, userID, name, email, password string, admin bool) error {
-	stmt, err := DB.Prepare("INSERT INTO user(user_id, name, email, password, admin) VALUES(?, ?, ?, ?, ?)")
+func (up userPersistence) Insert(userID, name, email, password string, admin bool) error {
+	stmt, err := infrastructure.DB.Prepare("INSERT INTO user(user_id, name, email, password, admin) VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -26,8 +27,8 @@ func (up userPersistence) Insert(DB *sql.DB, userID, name, email, password strin
 	return err
 }
 
-func (up userPersistence) SelectByEmail(DB *sql.DB, email string) (*domain.User, error) {
-	row := DB.QueryRow("SELECT * FROM user WHERE email = ?", email)
+func (up userPersistence) SelectByEmail(email string) (*domain.User, error) {
+	row := infrastructure.DB.QueryRow("SELECT * FROM user WHERE email = ?", email)
 	return convertToUser(row)
 }
 

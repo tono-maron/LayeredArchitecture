@@ -3,6 +3,7 @@ package persistence
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
+	"LayeredArchitecture/infrastructure"
 	"database/sql"
 )
 
@@ -12,13 +13,14 @@ func NewPostPersistence() repository.PostRepository {
 	return &postPersistence{}
 }
 
-func (pp postPersistence) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
-	row := DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
+func (pp postPersistence) SelectByPrimaryKey(postID int) (*domain.Post, error) {
+	row := infrastructure.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
 	return convertToPost(row)
+
 }
 
-func (pp postPersistence) GetAll(DB *sql.DB) ([]domain.Post, error) {
-	rows, err := DB.Query("SELECT * FROM post")
+func (pp postPersistence) GetAll() ([]domain.Post, error) {
+	rows, err := infrastructure.DB.Query("SELECT * FROM post")
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +39,8 @@ func (pp postPersistence) GetAll(DB *sql.DB) ([]domain.Post, error) {
 	return posts, nil
 }
 
-func (pp postPersistence) Insert(DB *sql.DB, content, userID string) error {
-	stmt, err := DB.Prepare("INSERT INTO post(content, create_user_id) VALUES(?, ?)")
+func (pp postPersistence) Insert(content, userID string) error {
+	stmt, err := infrastructure.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
 	}
@@ -46,8 +48,8 @@ func (pp postPersistence) Insert(DB *sql.DB, content, userID string) error {
 	return err
 }
 
-func (pp postPersistence) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
-	stmt, err := DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
+func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
+	stmt, err := infrastructure.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
 	if err != nil {
 		return err
 	}
@@ -55,8 +57,8 @@ func (pp postPersistence) UpdateByPrimaryKey(DB *sql.DB, postID int, content str
 	return err
 }
 
-func (pp postPersistence) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
-	stmt, err := DB.Prepare("DELETE FROM post WHERE post_id=?")
+func (pp postPersistence) DeleteByPrimaryKey(postID int) error {
+	stmt, err := infrastructure.DB.Prepare("DELETE FROM post WHERE post_id=?")
 	if err != nil {
 		return err
 	}
