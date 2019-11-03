@@ -13,7 +13,10 @@ import (
 // Driver名
 const driverName = "mysql"
 
-func NewDBConnection() *sql.DB {
+//DB接続情報
+var DB *sql.DB
+
+func NewDBConnection() {
 	/* ===== データベースへ接続する. ===== */
 	// ユーザ
 	user := os.Getenv("MYSQL_USER")
@@ -33,5 +36,4 @@ func NewDBConnection() *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return DB
 }

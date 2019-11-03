@@ -14,15 +14,13 @@ func NewPostPersistence() repository.PostRepository {
 }
 
 func (pp postPersistence) SelectByPrimaryKey(postID int) (*domain.Post, error) {
-	DB := infrastructure.NewDBConnection()
-	row := DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
+	row := infrastructure.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
 	return convertToPost(row)
 
 }
 
 func (pp postPersistence) GetAll() ([]domain.Post, error) {
-	DB := infrastructure.NewDBConnection()
-	rows, err := DB.Query("SELECT * FROM post")
+	rows, err := infrastructure.DB.Query("SELECT * FROM post")
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +40,7 @@ func (pp postPersistence) GetAll() ([]domain.Post, error) {
 }
 
 func (pp postPersistence) Insert(content, userID string) error {
-	DB := infrastructure.NewDBConnection()
-	stmt, err := DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
+	stmt, err := infrastructure.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
 	}
@@ -52,8 +49,7 @@ func (pp postPersistence) Insert(content, userID string) error {
 }
 
 func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
-	DB := infrastructure.NewDBConnection()
-	stmt, err := DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
+	stmt, err := infrastructure.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
 	if err != nil {
 		return err
 	}
@@ -62,8 +58,7 @@ func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
 }
 
 func (pp postPersistence) DeleteByPrimaryKey(postID int) error {
-	DB := infrastructure.NewDBConnection()
-	stmt, err := DB.Prepare("DELETE FROM post WHERE post_id=?")
+	stmt, err := infrastructure.DB.Prepare("DELETE FROM post WHERE post_id=?")
 	if err != nil {
 		return err
 	}

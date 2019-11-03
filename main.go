@@ -1,6 +1,7 @@
 package main
 
 import (
+	"LayeredArchitecture/infrastructure"
 	"LayeredArchitecture/infrastructure/persistence"
 	"LayeredArchitecture/interfaces/handler"
 	"LayeredArchitecture/interfaces/middleware"
@@ -22,6 +23,8 @@ var IsLetter = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
 
 // Run start server
 func Run(port int) {
+	//db接続
+	infrastructure.NewDBConnection()
 	log.Printf("Server running at http://localhost:%d/", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), Routes())
 	if err != nil {
