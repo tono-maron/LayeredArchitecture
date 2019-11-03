@@ -39,7 +39,7 @@ func (ph postHandler) HandlePostGet(writer http.ResponseWriter, request *http.Re
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 	}
 	//applicationレイヤを操作して、ユーザデータ取得
-	post, err := ph.postUsecase.SelectByPrimaryKey(config.DB, postID)
+	post, err := ph.postUsecase.SelectByPrimaryKey(postID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -71,7 +71,7 @@ func (ph postHandler) HandlePostCreate(writer http.ResponseWriter, request *http
 	//リクエストボディのパース
 	var requestBody postRequest
 	json.Unmarshal(body, &requestBody)
-	err = ph.postUsecase.Insert(config.DB, requestBody.Content, userID)
+	err = ph.postUsecase.Insert(requestBody.Content, userID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -97,7 +97,7 @@ func (ph postHandler) HandlePostUpdate(writer http.ResponseWriter, request *http
 	json.Unmarshal(body, &requestBody)
 
 	//applicationレイヤを操作して、ユーザデータ更新
-	err = ph.postUsecase.UpdateByPrimaryKey(config.DB, postID, requestBody.Content)
+	err = ph.postUsecase.UpdateByPrimaryKey(postID, requestBody.Content)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
@@ -112,7 +112,7 @@ func (ph postHandler) HandlePostDelete(writer http.ResponseWriter, request *http
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 	}
 	//applicationレイヤを操作して、ユーザデータ削除
-	err = ph.postUsecase.DeleteByPrimaryKey(config.DB, postID)
+	err = ph.postUsecase.DeleteByPrimaryKey(postID)
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return

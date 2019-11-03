@@ -3,15 +3,14 @@ package usecase
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"database/sql"
 )
 
 type PostUsecase interface {
-	SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error)
-	GetAll(DB *sql.DB) ([]domain.Post, error)
-	Insert(DB *sql.DB, content, userID string) error
-	UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error
-	DeleteByPrimaryKey(DB *sql.DB, postID int) error
+	SelectByPrimaryKey(postID int) (*domain.Post, error)
+	GetAll() ([]domain.Post, error)
+	Insert(content, userID string) error
+	UpdateByPrimaryKey(postID int, content string) error
+	DeleteByPrimaryKey(postID int) error
 }
 
 type postUsecase struct {
@@ -25,40 +24,40 @@ func NewPostUsecase(pr repository.PostRepository) PostUsecase {
 	}
 }
 
-func (pu postUsecase) SelectByPrimaryKey(DB *sql.DB, postID int) (*domain.Post, error) {
-	post, err := pu.postRepository.SelectByPrimaryKey(DB, postID)
+func (pu postUsecase) SelectByPrimaryKey(postID int) (*domain.Post, error) {
+	post, err := pu.postRepository.SelectByPrimaryKey(postID)
 	if err != nil {
 		return nil, err
 	}
 	return post, nil
 }
 
-func (pu postUsecase) GetAll(DB *sql.DB) ([]domain.Post, error) {
-	posts, err := pu.postRepository.GetAll(DB)
+func (pu postUsecase) GetAll() ([]domain.Post, error) {
+	posts, err := pu.postRepository.GetAll()
 	if err != nil {
 		return nil, err
 	}
 	return posts, nil
 }
 
-func (pu postUsecase) Insert(DB *sql.DB, content, userID string) error {
-	err := pu.postRepository.Insert(DB, content, userID)
+func (pu postUsecase) Insert(content, userID string) error {
+	err := pu.postRepository.Insert(content, userID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (pu postUsecase) UpdateByPrimaryKey(DB *sql.DB, postID int, content string) error {
-	err := pu.postRepository.UpdateByPrimaryKey(DB, postID, content)
+func (pu postUsecase) UpdateByPrimaryKey(postID int, content string) error {
+	err := pu.postRepository.UpdateByPrimaryKey(postID, content)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (pu postUsecase) DeleteByPrimaryKey(DB *sql.DB, postID int) error {
-	err := pu.postRepository.DeleteByPrimaryKey(DB, postID)
+func (pu postUsecase) DeleteByPrimaryKey(postID int) error {
+	err := pu.postRepository.DeleteByPrimaryKey(postID)
 	if err != nil {
 		return err
 	}
