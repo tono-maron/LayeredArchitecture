@@ -24,9 +24,12 @@ var IsLetter = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
 // Run start server
 func Run(port int) {
 	//NewDBConnection create db connection info.
-	infrastructure.NewDBConnection()
+	err := infrastructure.NewDBConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Printf("Server running at http://localhost:%d/", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), Routes())
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), Routes())
 	if err != nil {
 		log.Fatal(err)
 	}
