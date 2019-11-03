@@ -3,6 +3,7 @@ package persistence
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
+	"LayeredArchitecture/infrastructure"
 	"database/sql"
 )
 
@@ -13,12 +14,13 @@ func NewUserPersistence() repository.UserRepository {
 }
 
 func (up userPersistence) SelectByPrimaryKey(userID string) (*domain.User, error) {
-
+	DB := infrastructure.NewDBConnection()
 	row := DB.QueryRow("SELECT * FROM user WHERE user_id = ?", userID)
 	return convertToUser(row)
 }
 
 func (up userPersistence) Insert(userID, name, email, password string, admin bool) error {
+	DB := infrastructure.NewDBConnection()
 	stmt, err := DB.Prepare("INSERT INTO user(user_id, name, email, password, admin) VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
@@ -28,6 +30,7 @@ func (up userPersistence) Insert(userID, name, email, password string, admin boo
 }
 
 func (up userPersistence) SelectByEmail(email string) (*domain.User, error) {
+	DB := infrastructure.NewDBConnection()
 	row := DB.QueryRow("SELECT * FROM user WHERE email = ?", email)
 	return convertToUser(row)
 }

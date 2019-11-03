@@ -1,8 +1,9 @@
-package database
+package infrastructure
 
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	// blank import for MySQL driver
@@ -12,7 +13,7 @@ import (
 // Driver名
 const driverName = "mysql"
 
-func NewMySQLConnection() (*sql.DB, error) {
+func NewDBConnection() *sql.DB {
 	/* ===== データベースへ接続する. ===== */
 	// ユーザ
 	user := os.Getenv("MYSQL_USER")
@@ -29,5 +30,8 @@ func NewMySQLConnection() (*sql.DB, error) {
 	// user:password@tcp(host:port)/database
 	DB, err := sql.Open(driverName,
 		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database))
-	return DB, err
+	if err != nil {
+		log.Fatal(err)
+	}
+	return DB
 }
