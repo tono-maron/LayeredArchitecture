@@ -223,7 +223,7 @@ func TestDeleteByPrimaryKey(t *testing.T) {
 			}
 		}
 		if find {
-			t.Errorf("#%d: want contain content %s, but not found it", i, c.input[i])
+			t.Errorf("#%d: want contain content %d, but not found it", i, c.input[i])
 		}
 	}
 }

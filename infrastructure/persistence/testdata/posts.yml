@@ -1,0 +1,26 @@
+table: post
+record:
+  - post_id: 2
+    content: 最近は勉強することが楽しいです。
+    user_id: b52e63b5-42a4-471b-ae36-a0508206cd31
+  - post_id: 3
+    content: 明日はバイトなので早く寝たいです。
+    user_id: b52e63b5-42a4-471b-ae36-a0508206cd31
+  - post_id: 4
+    content: 今日私は朝ごはんを抜きました。
+    user_id: 51a32265-ac74-4677-84d8-665c32716ada
+  - post_id: 5
+    content: やぁ、おいらゴッティ！
+    user_id: 319a3327-ae1a-4fa7-ab86-edca1d45c8c2
+  - post_id: 6
+    content: 今日大胸筋むっちゃやらしいでぇ～。
+    user_id: 319a3327-ae1a-4fa7-ab86-edca1d45c8c2
+  - post_id: 7
+    content: この上腕二頭筋もこれもう最高やろ？
+    user_id: 319a3327-ae1a-4fa7-ab86-edca1d45c8c2
+  - post_id: 8
+    content: キミの僧帽筋はいったいどうなっちゃってるんだい！？
+    user_id: 319a3327-ae1a-4fa7-ab86-edca1d45c8c2
+  - post_id: 10
+    content: 5分で分かるヴァイオレットエバーガーデン。
+    user_id: a7b37623-81be-4dbc-b600-326cc88e5495
