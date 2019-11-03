@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"LayeredArchitecture/config"
 	"LayeredArchitecture/interfaces/dcontext"
 	"LayeredArchitecture/interfaces/response"
 	"LayeredArchitecture/usecase"
