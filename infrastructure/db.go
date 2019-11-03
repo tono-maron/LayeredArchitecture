@@ -31,7 +31,8 @@ func NewDBConnection() {
 
 	// 接続情報は以下のように指定する.
 	// user:password@tcp(host:port)/database
-	DB, err := sql.Open(driverName,
+	var err error
+	DB, err = sql.Open(driverName,
 		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database))
 	if err != nil {
 		log.Fatal(err)

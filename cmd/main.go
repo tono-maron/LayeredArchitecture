@@ -23,7 +23,7 @@ var IsLetter = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
 
 // Run start server
 func Run(port int) {
-	//db接続
+	//NewDBConnection create db connection info.
 	infrastructure.NewDBConnection()
 	log.Printf("Server running at http://localhost:%d/", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), Routes())
@@ -49,11 +49,11 @@ func Routes() *httprouter.Router {
 	router.POST("/user/signin", userHandler.HandleUserSignin)
 
 	// Post Route
-	//router.GET("/post/:id", middleware.Authenticate(handler.HandlePostGet))
-	router.GET("/post/index", middleware.Authenticate(postHandler.HandlePostsGet))
+	router.GET("/post/:id", middleware.Authenticate(postHandler.HandlePostGet))
+	router.GET("/posts/index", middleware.Authenticate(postHandler.HandlePostsGet))
 	router.POST("/post/create", middleware.Authenticate(postHandler.HandlePostCreate))
-	router.PUT("/post/update", middleware.Authenticate(postHandler.HandlePostUpdate))
-	router.DELETE("/post/delete", middleware.Authenticate(postHandler.HandlePostDelete))
+	router.PUT("/post/:id", middleware.Authenticate(postHandler.HandlePostUpdate))
+	router.DELETE("/post/:id", middleware.Authenticate(postHandler.HandlePostDelete))
 
 	return router
 }
