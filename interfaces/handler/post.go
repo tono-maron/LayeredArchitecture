@@ -48,7 +48,7 @@ func (ph postHandler) HandlePostGet(writer http.ResponseWriter, request *http.Re
 
 func (ph postHandler) HandlePostsGet(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	//applicationレイヤを操作して、ユーザデータ取得
-	posts, err := ph.postUsecase.GetAll(config.DB)
+	posts, err := ph.postUsecase.GetAll()
 	if err != nil {
 		response.Error(writer, http.StatusInternalServerError, err, "Internal Server Error")
 		return
