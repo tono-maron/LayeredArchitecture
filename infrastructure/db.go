@@ -12,7 +12,6 @@ import (
 // Driver名
 const driverName = "mysql"
 
-//DB接続情報
 var DB *sql.DB
 
 func NewDBConnection() error {
