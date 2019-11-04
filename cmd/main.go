@@ -40,7 +40,7 @@ func Routes() *httprouter.Router {
 	userPersistence := persistence.NewUserPersistence()
 	userUsecase := usecase.NewUserUsecase(userPersistence)
 	userHandler := handler.NewUserHandler(userUsecase)
-	postPersistence := persistence.NewPostPersistence()
+	postPersistence := persistence.NewPostPersistence(infrastructure.DB)
 	postUsecase := usecase.NewPostUsecase(postPersistence)
 	postHandler := handler.NewPostHandler(postUsecase)
 

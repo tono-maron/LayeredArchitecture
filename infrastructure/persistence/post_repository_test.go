@@ -66,7 +66,7 @@ func TestSelectByPrimaryKey(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		repo := infrastructure.NewPostPersistence(infrastructure.DB)
+		repo := NewPostRepository(infrastructure.DB)
 		post, err := repo.SelectByPrimaryKey(c.input)
 		if err != c.expectErr {
 			t.Fatalf("#%d: want error %#v, got %#v", i, c.expectErr, err)
@@ -93,7 +93,7 @@ func TestGetAll(t *testing.T) {
 		{[]int{2, 3, 4, 5, 6, 7, 8, 9, 10}},
 	}
 	for i, c := range cases {
-		repo := NewPostPersistence(infrastructure.DB)
+		repo := NewPostRepository(infrastructure.DB)
 		posts, err := repo.GetAll()
 		if err != nil {
 			t.Fatalf("#%d: want non error, got %#v", i, err)
@@ -124,7 +124,7 @@ func TestInsert(t *testing.T) {
 		{"", "b52e63b5-42a4-471b-ae36-a0508206cd31"},
 	}
 	for i, c := range cases {
-		repo := NewPostPersistence(infrastructure.DB)
+		repo := NewPostRepository(infrastructure.DB)
 		err := repo.Insert(c.inputContent, c.inputUserID)
 		if err != nil {
 			t.Fatalf("#%d: want non error, got %#v", i, err)
@@ -163,7 +163,7 @@ func TestUpdateByPrimaryKey(t *testing.T) {
 		{1, "今日は卵焼きを食べたいです。"},
 	}
 	for i, c := range cases {
-		repo := NewPostPersistence(infrastructure.DB)
+		repo := NewPostRepository(infrastructure.DB)
 		err := repo.UpdateByPrimaryKey(c.inputPostID, c.inputContent)
 		if err != nil {
 			t.Fatalf("#%d: want non error, got %#v", i, err)
@@ -202,7 +202,7 @@ func TestDeleteByPrimaryKey(t *testing.T) {
 	}
 	//テスト実行
 	for i, c := range cases {
-		repo := NewPostPersistence(infrastructure.DB)
+		repo := NewPostRepository(infrastructure.DB)
 		err := repo.DeleteByPrimaryKey(c.input[i])
 		if err != nil {
 			t.Fatalf("#%d: want non error, got %#v", i, err)
