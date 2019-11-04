@@ -24,6 +24,15 @@ func loadFixture(t *testing.T, DB *sql.DB, file string) {
 	}
 }
 
+//SELECTのテスト
+/*１件だけ取得
+全てのテストデータを別にする：selectされたデータを明確にするため
+条件を満たさない場合取得できないことを確認する
+複数件取得(検索条件に主キーを指定しない場合も含む)
+データは３件以上(検索条件に合致２件以上、合致しない１件以上)：複数件取得、データマッピングが正しいか確認するため
+「<」「>=」を使用している場合、同値ケースのテストをする
+AND、ORをつなげてる場合、その組み合わせも網羅的にテストする
+*/
 func TestSelectByPrimaryKey(t *testing.T) {
 	err := infrastructure.NewDBConnection()
 	if err != nil {
@@ -39,15 +48,6 @@ func TestSelectByPrimaryKey(t *testing.T) {
 		{
 			1,
 			nil,
-			sql.ErrNoRows,
-		},
-		{
-			2,
-			&domain.Post{
-				PostID:       2,
-				Content:      "最近は勉強することが楽しいです。",
-				CreateUserID: "b52e63b5-42a4-471b-ae36-a0508206cd31",
-			},
 			nil,
 		},
 		{
@@ -59,23 +59,18 @@ func TestSelectByPrimaryKey(t *testing.T) {
 			},
 			nil,
 		},
-		{
-			9,
-			nil,
-			sql.ErrNoRows,
-		},
 	}
-	for i, c := range cases {
+	for _, c := range cases {
 		repo := NewPostRepository(infrastructure.DB)
 		post, err := repo.SelectByPrimaryKey(c.input)
 		if err != c.expectErr {
-			t.Fatalf("#%d: want error %#v, got %#v", i, c.expectErr, err)
+			t.Fatalf("#%d: want error %#v, got %#v", c.input, c.expectErr, err)
 		}
 		if err != nil {
 			continue
 		}
 		if !reflect.DeepEqual(post, c.expectPost) {
-			t.Errorf("#%d: want %#v, got %#v", i, c.expectPost, post)
+			t.Errorf("#%d: want %#v, got %#v", c.input, c.expectPost, post)
 		}
 	}
 }
@@ -90,7 +85,7 @@ func TestGetAll(t *testing.T) {
 	cases := []struct {
 		expectIDs []int
 	}{
-		{[]int{2, 3, 4, 5, 6, 7, 8, 9, 10}},
+		{[]int{2, 3, 4, 5, 6, 7, 8, 10}},
 	}
 	for i, c := range cases {
 		repo := NewPostRepository(infrastructure.DB)
@@ -108,12 +103,18 @@ func TestGetAll(t *testing.T) {
 	}
 }
 
+/*INSERTのテスト
+null以外のデータを登録
+nullを許可するカラムにnullを登録
+カラム全てに最大桁のデータを登録
+一意制約に違反するデータを登録
+*/
 func TestInsert(t *testing.T) {
 	err := infrastructure.NewDBConnection()
 	if err != nil {
 		t.Fatalf("want non error, got %#v", err)
 	}
-	loadFixture(t, infrastructure.DB, "testdata/users.yml")
+	loadFixture(t, infrastructure.DB, "testdata/posts.yml")
 
 	cases := []struct {
 		inputContent string
@@ -147,6 +148,13 @@ func TestInsert(t *testing.T) {
 	}
 }
 
+/*UPDATAのテスト
+null以外のデータを登録
+nullを許可するカラムにnullを登録
+カラム全てに最大桁のデータを登録
+更新対象のレコードがないときの更新
+複数件のレコード更新
+*/
 func TestUpdateByPrimaryKey(t *testing.T) {
 	err := infrastructure.NewDBConnection()
 	if err != nil {
@@ -160,7 +168,6 @@ func TestUpdateByPrimaryKey(t *testing.T) {
 	}{
 		{6, "血管うねうねマスクメロン"},
 		{7, "キミプロテイン持ってない？"},
-		{1, "今日は卵焼きを食べたいです。"},
 	}
 	for i, c := range cases {
 		repo := NewPostRepository(infrastructure.DB)
@@ -188,6 +195,9 @@ func TestUpdateByPrimaryKey(t *testing.T) {
 	}
 }
 
+/*DELETEのテスト
+存在しないレコードの削除
+*/
 func TestDeleteByPrimaryKey(t *testing.T) {
 	err := infrastructure.NewDBConnection()
 	if err != nil {
