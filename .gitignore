@@ -3,5 +3,3 @@ go.sum
 *.iml
 .idea
 /db/setup.txt
-/db/ddl.sql
-/db/dml.sql
