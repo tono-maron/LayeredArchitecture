@@ -66,7 +66,7 @@ func TestSelectByPrimaryKey(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		repo := NewPostPersistence(infrastructure.DB)
+		repo := infrastructure.NewPostPersistence(infrastructure.DB)
 		post, err := repo.SelectByPrimaryKey(c.input)
 		if err != c.expectErr {
 			t.Fatalf("#%d: want error %#v, got %#v", i, c.expectErr, err)
