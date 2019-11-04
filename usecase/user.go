@@ -71,6 +71,9 @@ func (uu userUsecase) CreateAuthToken(email, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if user == nil {
+		return "", errors.New("This email address is not registered")
+	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return "", err

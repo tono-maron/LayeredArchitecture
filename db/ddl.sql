@@ -1,11 +1,11 @@
 -- -----------------------------------------------------
--- Schema dojo_api
+-- Schema test
 -- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `test` DEFAULT CHARACTER SET utf8 ;
 USE `test` ;
 
 -- -----------------------------------------------------
--- Table `dojo_api`.`user`
+-- Table `test`.`user`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `test`.`user` (
   `user_id` VARCHAR(128) NOT NULL COMMENT 'ユーザID',

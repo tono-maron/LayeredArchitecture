@@ -7,10 +7,12 @@ import (
 	"database/sql"
 )
 
-type postPersistence struct{}
+type postPersistence struct {
+	DB *sql.DB
+}
 
-func NewPostPersistence() repository.PostRepository {
-	return &postPersistence{}
+func NewPostPersistence(DB *sql.DB) repository.PostRepository {
+	return &postPersistence{DB: DB}
 }
 
 func (pp postPersistence) SelectByPrimaryKey(postID int) (*domain.Post, error) {
@@ -40,6 +42,7 @@ func (pp postPersistence) GetAll() ([]domain.Post, error) {
 }
 
 func (pp postPersistence) Insert(content, userID string) error {
+
 	stmt, err := infrastructure.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
