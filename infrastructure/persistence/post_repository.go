@@ -3,7 +3,6 @@ package persistence
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/repository"
-	"LayeredArchitecture/infrastructure"
 	"database/sql"
 )
 
@@ -16,13 +15,13 @@ func NewPostPersistence(DB *sql.DB) repository.PostRepository {
 }
 
 func (pp postPersistence) SelectByPrimaryKey(postID int) (*domain.Post, error) {
-	row := infrastructure.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
+	row := pp.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
 	return convertToPost(row)
 
 }
 
 func (pp postPersistence) GetAll() ([]domain.Post, error) {
-	rows, err := infrastructure.DB.Query("SELECT * FROM post")
+	rows, err := pp.DB.Query("SELECT * FROM post")
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +42,7 @@ func (pp postPersistence) GetAll() ([]domain.Post, error) {
 
 func (pp postPersistence) Insert(content, userID string) error {
 
-	stmt, err := infrastructure.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
+	stmt, err := pp.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func (pp postPersistence) Insert(content, userID string) error {
 }
 
 func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
-	stmt, err := infrastructure.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
+	stmt, err := pp.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
 	if err != nil {
 		return err
 	}
@@ -61,7 +60,7 @@ func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
 }
 
 func (pp postPersistence) DeleteByPrimaryKey(postID int) error {
-	stmt, err := infrastructure.DB.Prepare("DELETE FROM post WHERE post_id=?")
+	stmt, err := pp.DB.Prepare("DELETE FROM post WHERE post_id=?")
 	if err != nil {
 		return err
 	}
