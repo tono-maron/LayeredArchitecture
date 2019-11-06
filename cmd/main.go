@@ -37,7 +37,7 @@ func Run(port int) {
 
 // Routes returns the initialized router
 func Routes() *httprouter.Router {
-	userPersistence := persistence.NewUserPersistence()
+	userPersistence := persistence.NewUserPersistence(infrastructure.DB)
 	userUsecase := usecase.NewUserUsecase(userPersistence)
 	userHandler := handler.NewUserHandler(userUsecase)
 	postPersistence := persistence.NewPostPersistence(infrastructure.DB)

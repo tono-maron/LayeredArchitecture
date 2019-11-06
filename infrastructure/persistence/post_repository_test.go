@@ -1,12 +1,11 @@
 package persistence
 
 import (
+	"LayeredArchitecture/domain"
 	"LayeredArchitecture/infrastructure"
 	"database/sql"
 	"reflect"
 	"testing"
-
-	"LayeredArchitecture/domain"
 
 	fixture "github.com/takashabe/go-fixture"
 	_ "github.com/takashabe/go-fixture/mysql"

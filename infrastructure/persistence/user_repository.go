@@ -7,10 +7,14 @@ import (
 	"database/sql"
 )
 
-type userPersistence struct{}
+type userPersistence struct {
+	DB *sql.DB
+}
 
-func NewUserPersistence() repository.UserRepository {
-	return &userPersistence{}
+func NewUserPersistence(DB *sql.DB) repository.UserRepository {
+	return &userPersistence{
+		DB: DB,
+	}
 }
 
 func (up userPersistence) SelectByPrimaryKey(userID string) (*domain.User, error) {
