@@ -6,8 +6,9 @@ package mock_repository
 
 import (
 	domain "LayeredArchitecture/domain"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockPostRepository is a mock of PostRepository interface

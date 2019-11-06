@@ -2,7 +2,7 @@ package handler
 
 import (
 	"LayeredArchitecture/domain"
-	"LayeredArchitecture/interfaces/middleware"
+	"LayeredArchitecture/domain/mock_repository"
 	"database/sql"
 	"fmt"
 	"io"
@@ -12,20 +12,20 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/julienschmidt/httprouter"
-	"github.com/takashabe/go-ddd-sample/domain/repository"
 )
 
-func Routes() *httprouter.Router {
+func (ph postHandler) Routes() *httprouter.Router {
 
 	router := httprouter.New()
 
 	// Post Route
-	router.GET("/post/:id", middleware.Authenticate(postHandler.HandlePostGet))
-	router.GET("/posts/index", middleware.Authenticate(postHandler.HandlePostsGet))
-	router.POST("/post/create", middleware.Authenticate(postHandler.HandlePostCreate))
-	router.PUT("/post/:id", middleware.Authenticate(postHandler.HandlePostUpdate))
-	router.DELETE("/post/:id", middleware.Authenticate(postHandler.HandlePostDelete))
+	router.GET("/post/:id", ph.HandlePostGet)
+	// router.GET("/posts/index", middleware.Authenticate(postHandler.HandlePostsGet))
+	// router.POST("/post/create", middleware.Authenticate(postHandler.HandlePostCreate))
+	// router.PUT("/post/:id", middleware.Authenticate(postHandler.HandlePostUpdate))
+	// router.DELETE("/post/:id", middleware.Authenticate(postHandler.HandlePostDelete))
 
 	return router
 }
@@ -51,40 +51,41 @@ func TestHandlePostGet(t *testing.T) {
 		input    int
 		wantBody []byte
 		wantCode int
-		mock     func(*repository.MockUserRepository)
+		mock     func(*mock_repository.MockPostRepository)
 	}{
 		{
 			input:    1,
-			wantBody: []byte(`{"id":1,"name":"foo"}`),
+			wantBody: []byte(`{"PostID":1, "Content":"I like soccer."}, "CreateUserID":"abcd"`),
 			wantCode: http.StatusOK,
-			mock: func(r *repository.MockUserRepository) {
-				r.EXPECT().Get(gomock.Any(), 1).Return(&domain.User{ID: 1, Name: "foo"}, nil)
+			mock: func(r *mock_repository.MockPostRepository) {
+				r.EXPECT().SelectByPrimaryKey(1).Return(&domain.Post{PostID: 1, Content: "I like soccer.", CreateUserID: "abcd"}, nil)
 			},
 		},
 		{
 			input:    0,
 			wantBody: nil,
 			wantCode: http.StatusNotFound,
-			mock: func(r *repository.MockUserRepository) {
-				r.EXPECT().Get(gomock.Any(), 0).Return(nil, sql.ErrNoRows)
+			mock: func(r *mock_repository.MockPostRepository) {
+				r.EXPECT().SelectByPrimaryKey(0).Return(nil, sql.ErrNoRows)
 			},
 		},
 	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
+	for i, tt := range cases {
+		t.Run(fmt.Sprintf("case#%d", i), func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			userRepo := repository.NewMockUserRepository(ctrl)
-			tt.mock(userRepo)
+			postRepo := mock_repository.NewMockPostRepository(ctrl)
+			tt.mock(postRepo)
 
-			h := &Handler{
-				Repository: userRepo,
-			}
-			ts := prepareServer(t, h)
+			// ph := &postHandler{
+			// 	postUsecase: postRepo,
+			// }
+
+			ts := prepareServer(t)
 			defer ts.Close()
 
-			res := sendRequest(t, "GET", fmt.Sprintf("%s/user/%d", ts.URL, tt.input), nil)
+			res := sendRequest(t, "GET", fmt.Sprintf("%s/post/%d", ts.URL, tt.input), nil)
 			defer res.Body.Close()
 
 			if tt.wantCode != res.StatusCode {

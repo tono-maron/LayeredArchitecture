@@ -6,22 +6,22 @@ import (
 	"database/sql"
 )
 
-type postRepository struct {
+type postPersistence struct {
 	DB *sql.DB
 }
 
-func NewPostRepository(DB *sql.DB) repository.PostRepository {
-	return &postRepository{DB: DB}
+func NewPostPersistence(DB *sql.DB) repository.PostRepository {
+	return &postPersistence{DB: DB}
 }
 
-func (pr postRepository) SelectByPrimaryKey(postID int) (*domain.Post, error) {
-	row := pr.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
+func (pp postPersistence) SelectByPrimaryKey(postID int) (*domain.Post, error) {
+	row := pp.DB.QueryRow("SELECT * FROM post WHERE post_id = ?", postID)
 	return convertToPost(row)
 
 }
 
-func (pr postRepository) GetAll() ([]domain.Post, error) {
-	rows, err := pr.DB.Query("SELECT * FROM post")
+func (pp postPersistence) GetAll() ([]domain.Post, error) {
+	rows, err := pp.DB.Query("SELECT * FROM post")
 	if err != nil {
 		return nil, err
 	}
@@ -40,9 +40,9 @@ func (pr postRepository) GetAll() ([]domain.Post, error) {
 	return posts, nil
 }
 
-func (pr postRepository) Insert(content, userID string) error {
+func (pp postPersistence) Insert(content, userID string) error {
 
-	stmt, err := pr.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
+	stmt, err := pp.DB.Prepare("INSERT INTO post(content, user_id) VALUES(?, ?)")
 	if err != nil {
 		return err
 	}
@@ -50,8 +50,8 @@ func (pr postRepository) Insert(content, userID string) error {
 	return err
 }
 
-func (pr postRepository) UpdateByPrimaryKey(postID int, content string) error {
-	stmt, err := pr.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
+func (pp postPersistence) UpdateByPrimaryKey(postID int, content string) error {
+	stmt, err := pp.DB.Prepare("UPDATE post SET content=? WHERE post_id=?")
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func (pr postRepository) UpdateByPrimaryKey(postID int, content string) error {
 	return err
 }
 
-func (pr postRepository) DeleteByPrimaryKey(postID int) error {
-	stmt, err := pr.DB.Prepare("DELETE FROM post WHERE post_id=?")
+func (pp postPersistence) DeleteByPrimaryKey(postID int) error {
+	stmt, err := pp.DB.Prepare("DELETE FROM post WHERE post_id=?")
 	if err != nil {
 		return err
 	}
