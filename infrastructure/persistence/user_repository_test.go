@@ -52,5 +52,45 @@ func TestSelectUserByPrimaryKey(t *testing.T) {
 }
 
 func TestUserInsert(t *testing.T) {
+	err := infrastructure.NewDBConnection()
+	if err != nil {
+		t.Fatalf("want non error, got %#v", err)
+	}
+	loadFixture(t, infrastructure.DB, "testdata/posts.yml")
 
+	cases := []struct {
+		inputUserID   string
+		inputName     string
+		inputEmail    string
+		inputPassword string
+		inputAdmin    bool
+	}{
+		{"ilikesoccer", "takeshi", "takeshi@takeshi", "taketake", false},
+		{"Ilikesoccer", "hiroshi", "hiroshi@hiroshi", "hirohiro", false}, // duplicate
+		{"", "tono", "tono@tono", "tonotono", false},
+	}
+	for i, c := range cases {
+		repo := NewUserPersistence(infrastructure.DB)
+		err := repo.Insert(c.inputUserID, c.inputName, c.inputEmail, c.inputPassword, c.inputAdmin)
+		if err != nil {
+			t.Fatalf("#%d: want non error, got %#v", i, err)
+		}
+
+		user, err := repo.SelectByPrimaryKey(c.inputUserID)
+		if user.UserID == c.inputUserID {
+			t.Fatalf("#%d: want error %#v, got %#v", i, c.inputUserID, user.UserID)
+		}
+		if user.Name == c.inputName {
+			t.Fatalf("#%d: want error %#v, got %#v", i, c.inputName, user.Name)
+		}
+		if user.Email == c.inputEmail {
+			t.Fatalf("#%d: want error %#v, got %#v", i, c.inputEmail, user.Email)
+		}
+		if user.Password == c.inputPassword {
+			t.Fatalf("#%d: want error %#v, got %#v", i, c.inputPassword, user.Password)
+		}
+		if user.Admin == c.inputAdmin {
+			t.Fatalf("#%d: want error %#v, got %#v", i, c.inputAdmin, user.Admin)
+		}
+	}
 }
