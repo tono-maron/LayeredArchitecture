@@ -16,12 +16,12 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (ph postHandler) Routes() *httprouter.Router {
+func Routes() *httprouter.Router {
 
 	router := httprouter.New()
 
 	// Post Route
-	router.GET("/post/:id", ph.HandlePostGet)
+	router.GET("/post/:id", HandlePostGet)
 	// router.GET("/posts/index", middleware.Authenticate(postHandler.HandlePostsGet))
 	// router.POST("/post/create", middleware.Authenticate(postHandler.HandlePostCreate))
 	// router.PUT("/post/:id", middleware.Authenticate(postHandler.HandlePostUpdate))
