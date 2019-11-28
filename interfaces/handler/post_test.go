@@ -3,7 +3,8 @@ package handler
 import (
 	"LayeredArchitecture/domain"
 	"LayeredArchitecture/domain/mock_repository"
-	"database/sql"
+	"LayeredArchitecture/usecase"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,25 +14,21 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	"github.com/julienschmidt/httprouter"
+	"github.com/takashabe/go-router"
 )
 
-func (ph postHandler) Routes() *httprouter.Router {
-
-	router := httprouter.New()
-
-	// Post Route
-	router.GET("/post/:id", ph.HandlePostGet)
-	// router.GET("/posts/index", middleware.Authenticate(postHandler.HandlePostsGet))
-	// router.POST("/post/create", middleware.Authenticate(postHandler.HandlePostCreate))
-	// router.PUT("/post/:id", middleware.Authenticate(postHandler.HandlePostUpdate))
-	// router.DELETE("/post/:id", middleware.Authenticate(postHandler.HandlePostDelete))
-
-	return router
+func (ph postHandler) Routes() *router.Router {
+	r := router.NewRouter()
+	r.Get("/post/:id", ph.HandlePostGet)
+	r.Post("/post/:id", ph.HandlePostCreate)
+	r.Post("/posts", ph.HandlePostsGet)
+	r.Delete("/post/:id", ph.HandlePostDelete)
+	r.Put("/post/:id", ph.HandlePostUpdate)
+	return r
 }
 
-func prepareServer(t *testing.T) *httptest.Server {
-	return httptest.NewServer(Routes())
+func prepareServer(t *testing.T, ph postHandler) *httptest.Server {
+	return httptest.NewServer(ph.Routes())
 }
 
 func sendRequest(t *testing.T, method, url string, body io.Reader) *http.Response {
@@ -48,48 +45,63 @@ func sendRequest(t *testing.T, method, url string, body io.Reader) *http.Respons
 
 func TestHandlePostGet(t *testing.T) {
 	cases := []struct {
-		input    int
-		wantBody []byte
-		wantCode int
-		mock     func(*mock_repository.MockPostRepository)
+		requestBody string
+		wantBody    string
+		wantCode    int
+		mock        func(r *mock_repository.MockPostRepository)
 	}{
 		{
-			input:    1,
-			wantBody: []byte(`{"PostID":1, "Content":"I like soccer."}, "CreateUserID":"abcd"`),
-			wantCode: http.StatusOK,
+			requestBody: "",
+			wantBody:    "InternalServerError",
+			wantCode:    200,
+			mock: func(r *mock_repository.MockPostRepository) {
+				r.EXPECT().SelectByPrimaryKey(10).Return("", errors.New("Internal Server Error!"))
+			},
+		},
+		{
+			requestBody: "",
+			wantBody:    "",
+			wantCode:    500,
+			mock: func(r *mock_repository.MockPostRepository) {
+				r.EXPECT().SelectByPrimaryKey(1).Return("", nil)
+			},
+		},
+		{
+			requestBody: "",
+			wantBody:    `PostID: 2, Content: "I like humbarger.", CreateUserID: "aafhisfh"`,
+			wantCode:    200,
+			mock: func(r *mock_repository.MockPostRepository) {
+				r.EXPECT().SelectByPrimaryKey(1).Return(&domain.Post{PostID: 2, Content: "I like humbarger.", CreateUserID: "aafhisfh"}, nil)
+			},
+		},
+		{
+			requestBody: "",
+			wantBody:    `PostID: 1, Content: "I like soccer.", CreateUserID: "abcd"`,
+			wantCode:    200,
 			mock: func(r *mock_repository.MockPostRepository) {
 				r.EXPECT().SelectByPrimaryKey(1).Return(&domain.Post{PostID: 1, Content: "I like soccer.", CreateUserID: "abcd"}, nil)
 			},
 		},
-		{
-			input:    0,
-			wantBody: nil,
-			wantCode: http.StatusNotFound,
-			mock: func(r *mock_repository.MockPostRepository) {
-				r.EXPECT().SelectByPrimaryKey(0).Return(nil, sql.ErrNoRows)
-			},
-		},
 	}
-	for i, tt := range cases {
+
+	for i, c := range cases {
 		t.Run(fmt.Sprintf("case#%d", i), func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			postRepo := mock_repository.NewMockPostRepository(ctrl)
-			tt.mock(postRepo)
+			c.mock(postRepo)
+			pu := usecase.NewPostUsecase(postRepo)
+			ph := NewPostHandler(pu)
 
-			// ph := &postHandler{
-			// 	postUsecase: postRepo,
-			// }
-
-			ts := prepareServer(t)
+			ts := prepareServer(t, ph)
 			defer ts.Close()
 
-			res := sendRequest(t, "GET", fmt.Sprintf("%s/post/%d", ts.URL, tt.input), nil)
+			res := sendRequest(t, "GET", fmt.Sprintf("%s/post/%d", ts.URL), nil)
 			defer res.Body.Close()
 
-			if tt.wantCode != res.StatusCode {
-				t.Errorf("want %d, got %d", tt.wantCode, res.StatusCode)
+			if c.wantCode != res.StatusCode {
+				t.Errorf("want %d, got %d", c.wantCode, res.StatusCode)
 			}
 			if res.StatusCode != http.StatusOK {
 				return
@@ -99,7 +111,7 @@ func TestHandlePostGet(t *testing.T) {
 			if err != nil {
 				t.Fatalf("want non error, got %#v", err)
 			}
-			if diff := cmp.Diff(tt.wantBody, payload); diff != "" {
+			if diff := cmp.Diff(c.wantBody, payload); diff != "" {
 				t.Errorf("body mismatch %s", string(diff))
 			}
 		})

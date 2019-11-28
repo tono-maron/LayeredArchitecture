@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"LayeredArchitecture/infrastructure"
+	"database/sql"
 	"log"
 	"os"
 	"testing"
@@ -9,8 +10,13 @@ import (
 	fixture "github.com/takashabe/go-fixture"
 )
 
+type TestDB struct {
+	DB *sql.DB
+}
+
 func MainTest(m *testing.M) {
 	setup()
+	//m.Run()の前後にテストの前処理、後処理を書く。
 	os.Exit(m.Run())
 }
 
